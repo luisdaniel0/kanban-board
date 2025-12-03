@@ -24,27 +24,64 @@ const board = {
   ],
 };
 
+const createCard = (cards, columnContainer) => {
+  cards.forEach((card) => {
+    const task = document.createElement("div");
+    task.classList.add("card");
+
+    const taskTitle = document.createElement("h3");
+    taskTitle.classList.add("task-title");
+    taskTitle.textContent = card.title;
+    task.appendChild(taskTitle);
+
+    const taskDesc = document.createElement("p");
+    taskDesc.classList.add("task-description");
+    taskDesc.textContent = card.description;
+    task.appendChild(taskDesc);
+
+    columnContainer.appendChild(task);
+  });
+};
+
 const renderBoard = () => {
   board.columns.forEach((column) => {
-    console.log(column);
     const columnContainer = document.getElementById(column.id);
-    console.log(columnContainer);
-    column.cards.forEach((card) => {
-      console.log(card);
-      const task = document.createElement("div");
-      task.classList.add("card");
-      const taskTitle = document.createElement("h3");
-      taskTitle.textContent = `${card.title}`;
-      taskTitle.classList.add("task-title");
-      task.appendChild(taskTitle);
+    columnContainer.innerHTML = ""; // clear old cards
 
-      const taskDesc = document.createElement("p");
-      taskDesc.classList.add("task-description");
-      taskDesc.textContent = `${card.description}`;
-      task.appendChild(taskDesc);
+    // Create and append column title
+    const columnTitle = document.createElement("h2");
+    columnTitle.textContent = column.title;
+    columnTitle.classList.add("column-title");
+    columnContainer.appendChild(columnTitle);
 
-      columnContainer.appendChild(task);
-    });
+    // Append cards
+    createCard(column.cards, columnContainer);
+    addCard(columnContainer, column.id);
+  });
+};
+
+const addCard = (columnContainer, columnId) => {
+  console.log(columnContainer);
+  const addButton = document.createElement("button");
+  addButton.textContent = "Add";
+  addButton.dataset.columnId = columnId;
+  columnContainer.appendChild(addButton);
+  addButton.addEventListener("click", () => {
+    const columnId = addButton.dataset.columnId;
+    const title = prompt("Enter a card title:");
+    if (!title) return;
+    const description = prompt("enter a card description");
+
+    const newCard = {
+      id: Date.now(), //simple unique ID
+      title,
+      description,
+    };
+
+    const column = board.columns.find((col) => col.id === columnId);
+
+    column.cards.push(newCard);
+    renderBoard();
   });
 };
 
