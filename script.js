@@ -112,25 +112,51 @@ const renderBoard = () => {
 const addCard = (columnContainer, columnId) => {
   console.log(columnContainer);
   const addButton = document.createElement("button");
+  addButton.classList.add("add-button");
   addButton.textContent = "Add";
   addButton.dataset.columnId = columnId;
   columnContainer.appendChild(addButton);
+
   addButton.addEventListener("click", () => {
+    addButton.classList.add("hidden");
     const columnId = addButton.dataset.columnId;
-    const title = prompt("Enter a card title:");
-    if (!title) return;
-    const description = prompt("enter a card description");
+    const form = document.createElement("form");
+    form.setAttribute("id", "taskForm");
 
-    const newCard = {
-      id: Date.now(), //simple unique ID
-      title,
-      description,
-    };
+    const titleInput = document.createElement("input");
+    titleInput.setAttribute("type", "text");
+    titleInput.setAttribute("id", "titleInput");
+    titleInput.setAttribute("placeholder", "Task title...");
+    titleInput.setAttribute("name", "taskData");
 
-    const column = board.columns.find((col) => col.id === columnId);
+    const descriptionInput = document.createElement("textarea");
+    descriptionInput.setAttribute("id", "descriptionInput");
+    descriptionInput.setAttribute("placeholder", "Task description..");
 
-    column.cards.push(newCard);
-    renderBoard();
+    const saveButton = document.createElement("button");
+    saveButton.classList.add("save-button");
+    saveButton.textContent = "save";
+    saveButton.setAttribute("type", "submit");
+
+    form.appendChild(titleInput);
+    form.appendChild(descriptionInput);
+    form.appendChild(saveButton);
+    columnContainer.appendChild(form);
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      console.log(titleInput.value);
+      const title = titleInput.value;
+      const description = descriptionInput.value;
+      const newCard = {
+        id: Date.now(), //simple unique ID
+        title,
+        description,
+      };
+      const column = board.columns.find((col) => col.id === columnId);
+      column.cards.push(newCard);
+      renderBoard();
+    });
   });
 };
 
