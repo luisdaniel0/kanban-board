@@ -39,6 +39,21 @@ const createCard = (cards, columnContainer) => {
     taskDesc.textContent = card.description;
     task.appendChild(taskDesc);
 
+    const editButton = document.createElement("button");
+    editButton.textContent = "Edit";
+    task.appendChild(editButton);
+
+    editButton.addEventListener("click", () => {
+      const newTitle = prompt("enter new title:");
+      if (!newTitle) return;
+
+      const newDescription = prompt("enter new description");
+
+      card.title = newTitle;
+      card.description = newDescription;
+      renderBoard();
+    });
+
     columnContainer.appendChild(task);
   });
 };
