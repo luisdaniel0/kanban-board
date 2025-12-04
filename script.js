@@ -38,6 +38,10 @@ const createCard = (cards, columnContainer) => {
     taskDesc.classList.add("task-description");
     taskDesc.textContent = card.description;
     task.appendChild(taskDesc);
+    task.dataset.cardId = card.id;
+    task.dataset.columnId = columnContainer.id;
+    const cardId = Number(task.dataset.cardId);
+    const columnId = task.dataset.columnId;
 
     const editButton = document.createElement("button");
     editButton.textContent = "Edit";
@@ -52,6 +56,36 @@ const createCard = (cards, columnContainer) => {
       card.title = newTitle;
       card.description = newDescription;
       renderBoard();
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    task.appendChild(deleteButton);
+
+    deleteButton.addEventListener("click", () => {
+      const confirmation = confirm("are u sure u want to delete this card?");
+
+      if (confirmation === true) {
+        console.log(columnContainer.id);
+        console.log(card.id);
+        const column = board.columns.find((col) => col.id === columnId);
+        column.cards = column.cards.filter((c) => c.id !== cardId);
+        renderBoard();
+      }
+    });
+
+    taskTitle.contentEditable = true;
+    taskDesc.contentEditable = true;
+    taskTitle.addEventListener("blur", () => {
+      console.log("hello", cardId);
+      const newTitle = taskTitle.textContent;
+      card.title = newTitle;
+    });
+
+    taskDesc.addEventListener("blur", () => {
+      console.log("hellodescription", cardId);
+      const newDescription = taskDesc.textContent;
+      card.description = newDescription;
     });
 
     columnContainer.appendChild(task);
