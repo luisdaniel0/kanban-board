@@ -43,35 +43,56 @@ const createCard = (cards, columnContainer) => {
     const cardId = Number(task.dataset.cardId);
     const columnId = task.dataset.columnId;
 
-    const editButton = document.createElement("button");
-    editButton.textContent = "Edit";
-    task.appendChild(editButton);
+    // const editButton = document.createElement("button");
+    // editButton.textContent = "Edit";
+    // task.appendChild(editButton);
 
-    editButton.addEventListener("click", () => {
-      const newTitle = prompt("enter new title:");
-      if (!newTitle) return;
-
-      const newDescription = prompt("enter new description");
-
-      card.title = newTitle;
-      card.description = newDescription;
-      renderBoard();
-    });
+    // editButton.addEventListener("click", () => {
+    //   // const newTitle = prompt("enter new title:");
+    //   // if (!newTitle) return;
+    //   // const newDescription = prompt("enter new description");
+    //   // card.title = newTitle;
+    //   // card.description = newDescription;
+    //   // renderBoard();
+    // });
 
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     task.appendChild(deleteButton);
 
     deleteButton.addEventListener("click", () => {
-      const confirmation = confirm("are u sure u want to delete this card?");
+      const pendingDeleteCardId = card.id;
+      const pendingDeleteColumnId = columnContainer.id;
+      console.log(pendingDeleteCardId);
+      console.log(pendingDeleteColumnId);
+      const modal = document.querySelector(".modal");
+      modal.classList.remove("hidden");
+      const modalText = document.querySelector(".modalText");
+      modalText.textContent = `You are about to delete the ${card.title} task`;
 
-      if (confirmation === true) {
-        console.log(columnContainer.id);
-        console.log(card.id);
-        const column = board.columns.find((col) => col.id === columnId);
+      const cancelButton = document.querySelector(".cancel");
+      cancelButton.addEventListener("click", () => {
+        modal.classList.add("hidden");
+      });
+
+      const confirm = document.querySelector(".confirm");
+      confirm.addEventListener("click", () => {
+        const column = board.columns.find(
+          (col) => col.id === pendingDeleteColumnId
+        );
         column.cards = column.cards.filter((c) => c.id !== cardId);
+        modal.classList.add("hidden");
         renderBoard();
-      }
+      });
+      // const confirmation = confirm("are u sure u want to delete this card?");
+
+      // if (confirmation === true) {
+      //   console.log(columnContainer.id);
+      //   console.log(card.id);
+      //   const column = board.columns.find((col) => col.id === columnId);
+      //   column.cards = column.cards.filter((c) => c.id !== cardId);
+      //   renderBoard();
+      // }
     });
 
     taskTitle.contentEditable = true;
