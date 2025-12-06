@@ -1,61 +1,44 @@
 const board = {
   columns: [
-    {
-      id: "todo",
-      title: "To Do",
-      cards: [
-        {
-          id: 1,
-          title: "Learn JS",
-          description: "Practice DOM manipulation",
-        },
-      ],
-    },
-    {
-      id: "in-progress",
-      title: "In Progress",
-      cards: [],
-    },
-    {
-      id: "done",
-      title: "Done",
-      cards: [],
-    },
+    { id: "todo", title: "To Do", cards: [] },
+    { id: "in-progress", title: "In Progress", cards: [] },
+    { id: "done", title: "Done", cards: [] },
   ],
 };
 
+// ========== CREATE CARD ==========
 const createCard = (cards, columnContainer) => {
   cards.forEach((card) => {
     const task = document.createElement("div");
     task.classList.add("card");
-
-    const taskTitle = document.createElement("h3");
-    taskTitle.classList.add("task-title");
-    taskTitle.textContent = card.title;
-    task.appendChild(taskTitle);
-
-    const taskDesc = document.createElement("p");
-    taskDesc.classList.add("task-description");
-    taskDesc.textContent = card.description;
-    task.appendChild(taskDesc);
     task.dataset.cardId = card.id;
     task.dataset.columnId = columnContainer.id;
     const cardId = Number(task.dataset.cardId);
     const columnId = task.dataset.columnId;
 
-    // const editButton = document.createElement("button");
-    // editButton.textContent = "Edit";
-    // task.appendChild(editButton);
+    // Title
+    const taskTitle = document.createElement("h3");
+    taskTitle.classList.add("task-title");
+    taskTitle.textContent = card.title;
+    taskTitle.contentEditable = true;
+    task.appendChild(taskTitle);
 
-    // editButton.addEventListener("click", () => {
-    //   // const newTitle = prompt("enter new title:");
-    //   // if (!newTitle) return;
-    //   // const newDescription = prompt("enter new description");
-    //   // card.title = newTitle;
-    //   // card.description = newDescription;
-    //   // renderBoard();
-    // });
+    taskTitle.addEventListener("blur", () => {
+      card.title = taskTitle.textContent;
+    });
 
+    // Description
+    const taskDesc = document.createElement("p");
+    taskDesc.classList.add("task-description");
+    taskDesc.textContent = card.description;
+    taskDesc.contentEditable = true;
+    task.appendChild(taskDesc);
+
+    taskDesc.addEventListener("blur", () => {
+      card.description = taskDesc.textContent;
+    });
+
+    // Delete button
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
     task.appendChild(deleteButton);
@@ -63,75 +46,57 @@ const createCard = (cards, columnContainer) => {
     deleteButton.addEventListener("click", () => {
       const pendingDeleteCardId = card.id;
       const pendingDeleteColumnId = columnContainer.id;
-      console.log(pendingDeleteCardId);
-      console.log(pendingDeleteColumnId);
+
       const modal = document.querySelector(".modal");
       modal.classList.remove("hidden");
+
       const modalText = document.querySelector(".modalText");
-      modalText.textContent = `You are about to delete the ${card.title} task`;
+      modalText.textContent = `You are about to delete the "${card.title}" task`;
 
       const cancelButton = document.querySelector(".cancel");
-      cancelButton.addEventListener("click", () => {
-        modal.classList.add("hidden");
-      });
+      cancelButton.onclick = () => modal.classList.add("hidden");
 
-      const confirm = document.querySelector(".confirm");
-      confirm.addEventListener("click", () => {
+      const confirmButton = document.querySelector(".confirm");
+      confirmButton.onclick = () => {
         const column = board.columns.find(
           (col) => col.id === pendingDeleteColumnId
         );
-        column.cards = column.cards.filter((c) => c.id !== cardId);
+        column.cards = column.cards.filter((c) => c.id !== pendingDeleteCardId);
         modal.classList.add("hidden");
         renderBoard();
-      });
-      // const confirmation = confirm("are u sure u want to delete this card?");
-
-      // if (confirmation === true) {
-      //   console.log(columnContainer.id);
-      //   console.log(card.id);
-      //   const column = board.columns.find((col) => col.id === columnId);
-      //   column.cards = column.cards.filter((c) => c.id !== cardId);
-      //   renderBoard();
-      // }
+      };
     });
 
-    taskTitle.contentEditable = true;
-    taskDesc.contentEditable = true;
-    taskTitle.addEventListener("blur", () => {
-      console.log("hello", cardId);
-      const newTitle = taskTitle.textContent;
-      card.title = newTitle;
-    });
-
-    taskDesc.addEventListener("blur", () => {
-      console.log("hellodescription", cardId);
-      const newDescription = taskDesc.textContent;
-      card.description = newDescription;
+    // Drag & Drop
+    task.setAttribute("draggable", "true");
+    task.addEventListener("dragstart", (e) => {
+      e.dataTransfer.setData("text/plain", `${cardId}|${columnId}`);
     });
 
     columnContainer.appendChild(task);
   });
 };
 
+// ========== RENDER BOARD ==========
 const renderBoard = () => {
   board.columns.forEach((column) => {
     const columnContainer = document.getElementById(column.id);
-    columnContainer.innerHTML = ""; // clear old cards
+    columnContainer.innerHTML = "";
 
-    // Create and append column title
+    // Column title
     const columnTitle = document.createElement("h2");
     columnTitle.textContent = column.title;
     columnTitle.classList.add("column-title");
     columnContainer.appendChild(columnTitle);
 
-    // Append cards
+    // Cards
     createCard(column.cards, columnContainer);
     addCard(columnContainer, column.id);
   });
 };
 
+// ========== ADD CARD ==========
 const addCard = (columnContainer, columnId) => {
-  console.log(columnContainer);
   const addButton = document.createElement("button");
   addButton.classList.add("add-button");
   addButton.textContent = "Add";
@@ -140,23 +105,18 @@ const addCard = (columnContainer, columnId) => {
 
   addButton.addEventListener("click", () => {
     addButton.classList.add("hidden");
-    const columnId = addButton.dataset.columnId;
     const form = document.createElement("form");
-    form.setAttribute("id", "taskForm");
 
     const titleInput = document.createElement("input");
     titleInput.setAttribute("type", "text");
-    titleInput.setAttribute("id", "titleInput");
     titleInput.setAttribute("placeholder", "Task title...");
     titleInput.setAttribute("name", "taskData");
 
     const descriptionInput = document.createElement("textarea");
-    descriptionInput.setAttribute("id", "descriptionInput");
     descriptionInput.setAttribute("placeholder", "Task description..");
 
     const saveButton = document.createElement("button");
-    saveButton.classList.add("save-button");
-    saveButton.textContent = "save";
+    saveButton.textContent = "Save";
     saveButton.setAttribute("type", "submit");
 
     form.appendChild(titleInput);
@@ -166,14 +126,16 @@ const addCard = (columnContainer, columnId) => {
 
     form.addEventListener("submit", (e) => {
       e.preventDefault();
-      console.log(titleInput.value);
-      const title = titleInput.value;
-      const description = descriptionInput.value;
+      const title = titleInput.value.trim();
+      const description = descriptionInput.value.trim();
+      if (!title) return;
+
       const newCard = {
-        id: Date.now(), //simple unique ID
+        id: Date.now(),
         title,
         description,
       };
+
       const column = board.columns.find((col) => col.id === columnId);
       column.cards.push(newCard);
       renderBoard();
@@ -181,4 +143,48 @@ const addCard = (columnContainer, columnId) => {
   });
 };
 
+// ========== DRAG & DROP DELEGATION ==========
+const boardContainer = document.querySelector(".columns");
+
+boardContainer.addEventListener("dragover", (e) => {
+  e.preventDefault();
+});
+
+boardContainer.addEventListener("drop", (e) => {
+  e.preventDefault();
+  const targetColumn = e.target.closest(".column");
+  if (!targetColumn) return;
+
+  const [draggedCardId, fromColumnId] = e.dataTransfer
+    .getData("text/plain")
+    .split("|");
+  const draggedCardIdNum = Number(draggedCardId);
+
+  const fromColumn = board.columns.find((col) => col.id === fromColumnId);
+  const cardIndex = fromColumn.cards.findIndex(
+    (c) => c.id === draggedCardIdNum
+  );
+  const [draggedCard] = fromColumn.cards.splice(cardIndex, 1);
+
+  const toColumnId = targetColumn.id;
+  const toColumn = board.columns.find((col) => col.id === toColumnId);
+
+  // Determine insert position
+  const afterCard = e.target.closest(".card");
+  if (afterCard && afterCard.dataset.cardId) {
+    const toIndex = toColumn.cards.findIndex(
+      (c) => c.id === Number(afterCard.dataset.cardId)
+    );
+    const rect = afterCard.getBoundingClientRect();
+    const offset = e.clientY - rect.top;
+    const insertIndex = offset > rect.height / 2 ? toIndex + 1 : toIndex;
+    toColumn.cards.splice(insertIndex, 0, draggedCard);
+  } else {
+    toColumn.cards.push(draggedCard);
+  }
+
+  renderBoard();
+});
+
+// ========== INITIALIZE ==========
 renderBoard();
